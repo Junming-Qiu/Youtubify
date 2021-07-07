@@ -18,7 +18,7 @@ from prompt_toolkit.validation import Validator, ValidationError
 #ctrl-c to pause
 
 global api_key
-api_key = "AIzaSyC8V1FtAfr_35fr29ryLPB75CEcK66BrK4"
+api_key = ""
 
 #Simple song progress bar
 def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):

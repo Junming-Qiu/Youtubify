@@ -98,15 +98,28 @@ def search_mode(max_results=10):
     for i in range(max_results):
         result_ids.append(json_thing["items"][i]["id"]["videoId"])
         name_ids.append(json_thing["items"][i]["snippet"]["title"])
-        print(f"Result #{i}:", json_thing["items"][i]["snippet"]["title"])
+        #print(f"Result #{i}:", json_thing["items"][i]["snippet"]["title"])
 
-    print("Choose Song:")
-    
-    choice = input()
-    if not choice.isnumeric():
-        choice = -1
-    else:
-        choice = int(choice)
+    # print("Choose Song:")
+    # choice = input()
+
+    search_CLI = [
+        {
+            'type': 'list',
+            'name': 'user_option',
+            'message': 'Choose a Song: ',
+            'choices': name_ids
+        }
+    ]
+
+    answers = prompt(search_CLI, style=custom_style_2)
+    answers_name = answers.get("user_option")
+    choice = name_ids.index(answers_name)
+
+    # if not choice.isnumeric():
+    #     choice = -1
+    # else:
+    #     choice = int(choice)
 
     if 0 <= choice <= 10:
         return result_ids[choice], name_ids[choice]

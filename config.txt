@@ -1,0 +1,4 @@
+- Enter names of playlists here:
+- Use "-" at beginning of line to comment out line
+songlist.txt
+queen.txt

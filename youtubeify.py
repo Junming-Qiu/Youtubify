@@ -1,13 +1,13 @@
 import pafy
-import vlc #Windows requires VLC installed 64 bits
+import vlc # Windows requires VLC installed 64 bits
 import time
 import requests
 import random
+import api # Python file which return youtube api key
 
 #Command line tools
 from PyInquirer import prompt
 from examples import custom_style_2
-from prompt_toolkit.validation import Validator, ValidationError
 
 #Junming Qiu
 #Youtubeify - Command line Youtube audio player from URLs
@@ -18,7 +18,7 @@ from prompt_toolkit.validation import Validator, ValidationError
 #ctrl-c to pause
 
 global api_key
-api_key = "AIzaSyC8V1FtAfr_35fr29ryLPB75CEcK66BrK4"
+api_key = api.get_api_key()
 
 #Simple song progress bar
 def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
@@ -45,7 +45,8 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
         bar = fill * filledLength + '-' * (length - filledLength)
         print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
         
-#Finds all titles of urls from playlist txt files       
+#Finds all titles of urls from playlist txt files
+#show_url setting is for debug -> determining what url matches to each song
 def update_song_directory(songs, show_url = False):
     name_url = []
 
@@ -58,12 +59,11 @@ def update_song_directory(songs, show_url = False):
         if show_url:
             name_url.append((json_thing["items"][0]["snippet"]["title"], song))
         else:
-            #name_url.append((json_thing["items"][0]["snippet"]["title"], ""))
             name_url.append(json_thing["items"][0]["snippet"]["title"])
 
     return name_url
-
-#Gets duration of video
+    
+#Gets duration of video using API
 def get_duration(song_id):
     new_url = f"https://www.googleapis.com/youtube/v3/videos?id={song_id}&part=contentDetails&key={api_key}"
     response = requests.get(new_url)
@@ -98,10 +98,6 @@ def search_mode(max_results=10):
     for i in range(max_results):
         result_ids.append(json_thing["items"][i]["id"]["videoId"])
         name_ids.append(json_thing["items"][i]["snippet"]["title"])
-        #print(f"Result #{i}:", json_thing["items"][i]["snippet"]["title"])
-
-    # print("Choose Song:")
-    # choice = input()
 
     search_CLI = [
         {
@@ -116,15 +112,11 @@ def search_mode(max_results=10):
     answers_name = answers.get("user_option")
     choice = name_ids.index(answers_name)
 
-    # if not choice.isnumeric():
-    #     choice = -1
-    # else:
-    #     choice = int(choice)
-
     if 0 <= choice <= 10:
         return result_ids[choice], name_ids[choice]
     else:
         return None
+
 
 #Main Program loop
 def play(songs, shuffle):
@@ -157,7 +149,6 @@ def play(songs, shuffle):
                 song = songs[curr_song_num]
                 print()
                 print(f"Now Playing #{curr_song_num}:", song_directory[curr_song_num], 50 * " ")
-                #print(f"Now Playing #{curr_song_num}:", song_directory[curr_song_num][0], 50 * " ")
             
             else:
                 song = f"https://www.youtube.com/watch?v={searched_song[0]}"
@@ -167,7 +158,12 @@ def play(songs, shuffle):
             searched_song = None
             
             url = song.strip()
-            video = pafy.new(url)
+            try:
+                video = pafy.new(url)
+            except KeyError:
+                curr_song_num += 1
+                break
+            
             best = video.getbest()
             playurl = best.url
             playtime = get_duration(song.split("=")[1])
@@ -211,17 +207,12 @@ def play(songs, shuffle):
                     #Display Timestamp
                     elif instr == "l":
                         print(f"Currently Playing #{curr_song_num}:", song_directory[curr_song_num])
-                        #print(f"Currently Playing #{curr_song_num}:", song_directory[curr_song_num][0])
                         print("Current time:", count // 60, "m", count % 60, "s")
                         print("Total Length:", playtime // 60, "m", playtime % 60, "s\n")
                         player.play()
                         
                     #Show List of Songs -> Select Song
                     elif instr == "g":
-                        # for i, name_url_tup in enumerate(song_directory):
-                        #     print(f"Song {i}: ", name_url_tup)
-                        #     #print(f"Song {i}: ", name_url_tup[0])
-                        #     #print(f"Song {i}: ", name_url_tup[0], "||", name_url_tup[1])
                         
                         playlist_CLI = [
                             {
@@ -236,14 +227,6 @@ def play(songs, shuffle):
                         answer_name = answers.get("user_option")
                         new_song_num = song_directory.index(answer_name)
 
-                        # print()
-                        # print("Choose a valid song #: ")
-                        #new_song_num = input()
-                        # if not new_song_num.isnumeric():
-                        #     new_song_num = -1
-                        # else:
-                        #     new_song_num = int(new_song_num)
-                        
                         if 0 <= new_song_num < len(songs):
                             player.stop()
                             curr_song_num = new_song_num
@@ -296,9 +279,8 @@ def play(songs, shuffle):
                                 player.stop()
                                 break
                             elif command == "aq":
-                                songs.append(searched_song[0])
+                                songs.append(f"https://www.youtube.com/watch?v={searched_song[0]}")
                                 print(searched_song[0], searched_song[1])
-                                #song_directory.append((searched_song[1], ""))
                                 song_directory.append(searched_song[1])
                                 print(f"Song: {searched_song[1]} added to queue")
                                 searched_song = None
@@ -367,7 +349,9 @@ search song, show song timestamp, progress bar
 
 """
 WIP:
-- Selector for songs
+- Change all input to CLI
+- Make terminal overwrite line
+- Hide API key
 - Fast forward, back
 - Add albums by url
 - Edit playlists

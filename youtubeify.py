@@ -4,6 +4,7 @@ import time
 import requests
 import random
 import api # Python file which return youtube api key
+import os
 
 #Command line tools
 from PyInquirer import prompt
@@ -19,6 +20,29 @@ from examples import custom_style_2
 
 global api_key
 api_key = api.get_api_key()
+
+#Opens title file name and pulls random title art
+def grab_title_art(titlefonts=None):
+    if not titlefonts:    
+        return "{==Welcome to Youtubify==}"
+
+    with open(titlefonts, "r") as f:
+        rand_title = random.randint(1, int(f.readline()))
+        line = f.readline()
+        count = 0
+        while len(line) != 0 and count < rand_title:
+            line = f.readline()
+            if line[:2] == "~>":
+                count += 1
+                height = int(line.strip().split(" ")[1])
+        
+        ret_title = ""
+       
+        for i in range(height):
+            ret_title += f.readline()
+
+        f.close()
+        return ret_title
 
 #Simple song progress bar
 def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
@@ -123,7 +147,7 @@ def play(songs, shuffle):
     STOP = False
     searched_song = None
     
-    print("{==Welcome to Youtubify==}")
+    print(grab_title_art("titlefonts.txt"))
     print("Press 'ctrl-c' to pause and see controls")
     print("Press enter now to add all playlists")
     print("Type anything else and enter to add songs by search")
@@ -136,6 +160,7 @@ def play(songs, shuffle):
     if not shuffle:
         song_directory = update_song_directory(songs)
     
+    # Load playlist loop
     while not STOP:
         if shuffle:
             print("Shuffling Songs...\n")
@@ -144,7 +169,11 @@ def play(songs, shuffle):
 
         curr_song_num = 0
         
+        
+        # Initialize song loop
         while curr_song_num < len(songs):
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print(len(songs), "songs loaded")
             if searched_song == None:
                 song = songs[curr_song_num]
                 print()
@@ -177,7 +206,10 @@ def play(songs, shuffle):
             player.play()
 
             count = 0
+            
             printProgressBar(0, playtime, prefix = ' Time', suffix = 'Complete', length = 50)
+
+            # Play song loop
             while count < playtime:
                 try:
                     time.sleep(1)
@@ -349,9 +381,8 @@ search song, show song timestamp, progress bar
 
 """
 WIP:
-- Change all input to CLI
-- Make terminal overwrite line
-- Hide API key
+- Executable to run
+- Procedural loading for playlists
 - Fast forward, back
 - Add albums by url
 - Edit playlists
@@ -359,4 +390,9 @@ WIP:
 - Show next song
 - Config file more options
 - Generate sound from app
+- More error catching
+- Move functions into other package
+- Change file structure
+- Song classification system
+- Playlist classification system
 """

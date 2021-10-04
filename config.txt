@@ -1,6 +1,8 @@
 - Enter names of playlists here:
 - Use "-" at beginning of line to comment out line
-playlists/oldersongs.txt
--playlists/queen.txt
+- playlists/oldersongs.txt
+- playlists/queen.txt
 playlists/chillsongs.txt
 playlists/newsongs.txt
+playlists/happy.txt
+- playlists/slowsongs.txt

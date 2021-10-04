@@ -45,7 +45,7 @@ def grab_title_art(titlefonts=None):
         return ret_title
 
 #Simple song progress bar
-def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r"):
     """
     Call in a loop to create terminal progress bar
     @params:
@@ -61,7 +61,7 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     if iteration == total: 
         filledLength = int(length * iteration // total)
         bar = fill * filledLength + '-' * (length - filledLength)
-        print(f'\r{prefix} |{bar}| {100}% {suffix}', end = printEnd)
+        print(f"\r{prefix} |{bar}| {100}% {suffix}", end = printEnd)
         print()
     else:
         percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
@@ -143,7 +143,7 @@ def search_mode(max_results=10):
 
 
 #Main Program loop
-def play(songs, shuffle):
+def play(songs, shuffle:bool):
     STOP = False
     searched_song = None
     
@@ -207,7 +207,7 @@ def play(songs, shuffle):
 
             count = 0
             
-            printProgressBar(0, playtime, prefix = ' Time', suffix = 'Complete', length = 50)
+            printProgressBar(0, playtime, prefix = ' Time', suffix = '', length = 50)
 
             # Play song loop
             while count < playtime:
@@ -215,7 +215,7 @@ def play(songs, shuffle):
                     time.sleep(1)
                     items = list(range(0, 57))
                 
-                    printProgressBar(count, playtime, prefix = ' Time', suffix = 'Complete', length = 50)
+                    printProgressBar(count, playtime, prefix = ' Time', suffix = '', length = 50)
                     count += 1
                 except KeyboardInterrupt:
                     player.pause()
@@ -235,6 +235,17 @@ def play(songs, shuffle):
                         print()
                         player.stop()
                         break
+
+                    #Reload song
+                    elif instr == "r":
+                        print()
+                        curr_song_num -= 1
+                        player.stop()
+                        break
+
+                    elif instr == "rr":
+                        print()
+                        
                     
                     #Display Timestamp
                     elif instr == "l":
@@ -292,8 +303,9 @@ def play(songs, shuffle):
                     #Show commands
                     elif instr == "h":
                         print("Media Controls: l = remaining playtime, +/- = volume controls")
-                        print("Song Controls: p = play, s = skip, g = go to song")
+                        print("Song Controls: p = play, s = skip, r = reload, g = go to song")
                         print("App Controls: sh = shuffle, ed = edit playlists, exit = close app\n")
+                        print("Search Controls: $p = search + play, $aq = search + add to queue")
                         player.play()
                     
                     #Enter Search Mode -> Select song || Add song to playlist
@@ -381,8 +393,10 @@ search song, show song timestamp, progress bar
 
 """
 WIP:
+- Make downloadable mp3s
 - Executable to run
 - Procedural loading for playlists
+- Reload playlists -> to edit playlist and add new song on the fly
 - Fast forward, back
 - Add albums by url
 - Edit playlists
@@ -392,7 +406,6 @@ WIP:
 - Generate sound from app
 - More error catching
 - Move functions into other package
-- Change file structure
 - Song classification system
 - Playlist classification system
 """
